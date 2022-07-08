@@ -1,21 +1,37 @@
 import PySimpleGUI as sg
+import csv
+
+
 
 sg.theme('DarkAmber')   # Add a touch of color
 # All the stuff inside your window.
 #constants
-time_input_size = (4,1)
+time_field_size = (4,1)
+
+
+try:
+    with open('time_table.csv','r+') as time_file:
+        csv_writer = csv.writer(time_file)
+        csv_reader = csv.reader(time_file)
+except:
+    with open('time_table.csv','w') as time_file:
+        csv_writer = csv.writer(time_file)
+        csv_reader = csv.reader(time_file)
 
 
 menu_def = [['File', ['Open', 'Save', 'Exit']],
             ['Help', 'About...']]
 
-MAX_ROWS = 10
-MAX_COL = 3
+rows = csv_reader.line_num
+cols = 3
 
+
+column_layout = [[sg.Text(size=(10, 1), pad=(1,1),\
+    border_width=0, justification='right', background_color="#705e52",key=(i, j)) for j in range(cols)] for i in range(rows)]
 
 layout = [  [sg.Text('TimeCheck',font = ("Helvetica",20))],
-            [sg.Text('In:'), sg.InputText(size=time_input_size),sg.Text('Out:'),sg.InputText(size=time_input_size),sg.Button('+')],
-            [sg.Table(values = data[:1][:]) ]]
+            [sg.Text('In:'), sg.InputText(size=time_field_size),sg.Text('Out:'),sg.InputText(size=time_field_size),sg.Button('+')],
+            [sg.Col(column_layout, size=(400,400), scrollable=True)]]
 
 # Create the Window
 window = sg.Window('Window Title', layout)
@@ -26,7 +42,8 @@ while True:
         break
 
     if event == '+':
-        print("test passed")
+        #add in what happens when + is entered
+        pass
 
 
 window.close()
