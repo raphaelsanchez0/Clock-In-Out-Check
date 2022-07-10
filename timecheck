@@ -1,5 +1,6 @@
 import PySimpleGUI as sg
 import csv
+import os.path
 
 
 
@@ -8,16 +9,30 @@ sg.theme('DarkAmber')   # Add a touch of color
 #constants
 time_field_size = (4,1)
 
+table_name = 'time_table.csv'
 
-try:
-    with open('time_table.csv','r+') as time_file:
-        csv_writer = csv.writer(time_file)
-        csv_reader = csv.reader(time_file)
-        csv_writer.writerow("In,Out,Hours")
-except:
-    with open('time_table.csv','w') as time_file:
-        csv_writer = csv.writer(time_file)
-        csv_reader = csv.reader(time_file)
+time_file_exists = os.path.isfile(table_name)
+
+with open(table_name,'a') as time_file:
+    
+    with open(table_name,'r+') as time_file:
+        headers = ['In','Out','Hours']
+        csv_writer = csv.DictWriter(time_file,fieldnames=headers)
+        csv_reader = csv.DictReader(time_file)
+        row_counter = 0
+        #remote the plus one later
+        for row in csv_reader:
+            row_counter+=1
+
+        rows = row_counter+1
+        print(rows)
+        cols = 3
+
+        for line in csv_reader:
+            if line:
+                csv_writer.writerow(line)
+        if not time_file_exists:
+            csv_writer.writeheader()
         
 
 
@@ -25,16 +40,18 @@ except:
 menu_def = [['File', ['Open', 'Save', 'Exit']],
             ['Help', 'About...']]
 
-rows = csv_reader.line_num
-cols = 3
+
+
 
 
 column_layout = [[sg.Text(size=(10, 1), pad=(1,1),\
     border_width=0, justification='right', background_color="#705e52",key=(i, j)) for j in range(cols)] for i in range(rows)]
 
 layout = [  [sg.Text('TimeCheck',font = ("Helvetica",20))],
-            [sg.Text('In:'), sg.InputText(size=time_field_size),sg.Text('Out:'),sg.InputText(size=time_field_size),sg.Button('+')],
+            [sg.Text('In:'), sg.Input(size=time_field_size,key='input_in_time'),sg.Text('Out:'),sg.Input(size=time_field_size,key='input_out_time'),sg.Button('+')],
             [sg.Col(column_layout, size=(400,400), scrollable=True)]]
+
+
 
 # Create the Window
 window = sg.Window('Window Title', layout)
@@ -45,7 +62,10 @@ while True:
         break
 
     if event == '+':
-        #add in what happens when + is entered
+        print(values['input_in_time'])
+        print(values['input_out_time'])
+        #
+
         pass
 
 
