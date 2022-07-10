@@ -13,24 +13,31 @@ table_name = 'time_table.csv'
 
 time_file_exists = os.path.isfile(table_name)
 
+
 with open(table_name,'a') as time_file:
     
     with open(table_name,'r+') as time_file:
         headers = ['In','Out','Hours']
         csv_writer = csv.DictWriter(time_file,fieldnames=headers)
-        csv_reader = csv.DictReader(time_file)
+        csv_reader = csv.reader(time_file)
         row_counter = 0
         #remote the plus one later
+        
         for row in csv_reader:
             row_counter+=1
-
         rows = row_counter+1
-        print(rows)
+        
         cols = 3
+
+        
+
+
 
         for line in csv_reader:
             if line:
                 csv_writer.writerow(line)
+
+        data = list(csv_reader)
         if not time_file_exists:
             csv_writer.writeheader()
         
@@ -42,19 +49,23 @@ menu_def = [['File', ['Open', 'Save', 'Exit']],
 
 
 
-
+table_layout = [[sg.Table(values=data, 
+                            headings=headers,
+                            num_rows=rows
+                            )]]
 
 column_layout = [[sg.Text(size=(10, 1), pad=(1,1),\
     border_width=0, justification='right', background_color="#705e52",key=(i, j)) for j in range(cols)] for i in range(rows)]
 
 layout = [  [sg.Text('TimeCheck',font = ("Helvetica",20))],
-            [sg.Text('In:'), sg.Input(size=time_field_size,key='input_in_time'),sg.Text('Out:'),sg.Input(size=time_field_size,key='input_out_time'),sg.Button('+')],
-            [sg.Col(column_layout, size=(400,400), scrollable=True)]]
+            [sg.Text('In:'), sg.Input(size=time_field_size,key='-INPUT_IN_TIME'),sg.Text('Out:'),sg.Input(size=time_field_size,key='-INPUT_OUT_TIME-'),sg.Button('+')],
+            #[sg.Col(column_layout, size=(400,400), scrollable=True)]]
+            [table_layout]]
 
 
 
 # Create the Window
-window = sg.Window('Window Title', layout)
+window = sg.Window('Window Title', layout,grab_anywhere=False)
 # Event Loop to process "events" and get the "values" of the inputs
 while True:
     event, values = window.read()
@@ -62,11 +73,12 @@ while True:
         break
 
     if event == '+':
-        print(values['input_in_time'])
-        print(values['input_out_time'])
-        #
+        with open(table_name, 'w') as time_file:
+            writer = csv.DictWriter(time_file,fieldnames=headers)
+            in_time = values['-INPUT_IN_TIME']
+            out_time = values['-INPUT_IN_TIME']
 
-        pass
+            writer.writerow({'In':values['-INPUT_IN_TIME'],'Out':values['-INPUT_OUT_TIME-'],'Hours':2})
 
 
 window.close()
