@@ -1,14 +1,24 @@
 import PySimpleGUI as sg
+import datetime
 
 sg.theme('Dark Red')
 
 
+def validate_time_input(time):
+    time_format = '%H:%M'
+    try:
+        validate_time = datetime.datetime.strptime(time,time_format)
+        return validate_time
+    except:
+        return False
+
+
+
 data = [
-    ['9:21','3:20','2.12'],
-    ['9:55','3:22','2.14'],
-
-
+    ['9:21 AM','3:20 PM','2.12'],
+    ['9:55 AM','3:22 PM','2.14'],
 ]
+
 headings = ['In','Out','Hours']
 
 
@@ -29,8 +39,8 @@ table_layout = [
 time_field_size = (4,1)
 layout = [
     [sg.Text('TimeCheck',font = ("Helvetica",20))],
-    [sg.Text('In:'), sg.Input(size=time_field_size,key='-INPUT_IN_TIME-'),sg.DropDown(['AM','PM'],key = '-IN_DAYTIME_STATUS-') ,sg.Text('Out:'),\
-        sg.Input(size=time_field_size,key='-INPUT_OUT_TIME-'),sg.DropDown(['AM','PM'],key = 'OUT_DAYTIME_STATUS-'),sg.Button('+')],
+    [sg.Text('In:'), sg.Input(size=time_field_size,key='-INPUT_IN_TIME-'),sg.DropDown(['AM','PM'],key = '-IN_DAYTIME_STATUS-',readonly=True) ,sg.Text('Out:'),\
+        sg.Input(size=time_field_size,key='-INPUT_OUT_TIME-',),sg.DropDown(['AM','PM'],key = '-OUT_DAYTIME_STATUS-',readonly=True),sg.Button('+')],
     [table_layout]
 ]
 window = sg.Window("TimeCheck",layout)
@@ -42,9 +52,14 @@ while True:
     if event == '+':
 
         in_time = values['-INPUT_IN_TIME-']
+        in_time_daytime_status = values['-IN_DAYTIME_STATUS-']
         out_time = values['-INPUT_OUT_TIME-']
+        out_time_daytime_status = values['-OUT_DAYTIME_STATUS-']
 
-        data.append([in_time,out_time,"totalTimeDiff"])
+
+        #if len(in_time)
+
+        data.append([in_time +' '+in_time_daytime_status,out_time+' '+out_time_daytime_status,"totalTimeDiff"])
         window['-TABLE-'].update(values=data)
         print(data)
 window.close()
