@@ -1,22 +1,24 @@
+from typing import Counter
 import PySimpleGUI as sg
 import datetime
 
 sg.theme('Dark Red')
-
+time_format = '%H:%M'
 
 def validate_time_input(time):
-    time_format = '%H:%M'
     try:
         validate_time = datetime.datetime.strptime(time,time_format)
         return validate_time
     except:
         return False
 
-
+def date_time_to_string(date_time):
+    return str(date_time.hour)+':'+str(date_time.minute)
 
 data = [
     ['9:21 AM','3:20 PM','2.12'],
     ['9:55 AM','3:22 PM','2.14'],
+
 ]
 
 headings = ['In','Out','Hours']
@@ -55,11 +57,33 @@ while True:
         in_time_daytime_status = values['-IN_DAYTIME_STATUS-']
         out_time = values['-INPUT_OUT_TIME-']
         out_time_daytime_status = values['-OUT_DAYTIME_STATUS-']
-
-
+        in_and_out_time = [in_time,out_time]
+        in_and_out_statuses = [in_time_daytime_status,out_time_daytime_status]
         #if len(in_time)
+        counter = 0
+        parced_in_out_times = []
+        for time in in_and_out_time:
+            if validate_time_input(time):
+                validated_time=validate_time_input(time)
+                #adding user input into the data list and updating table values accordingly
 
-        data.append([in_time +' '+in_time_daytime_status,out_time+' '+out_time_daytime_status,"totalTimeDiff"])
-        window['-TABLE-'].update(values=data)
-        print(data)
+                if in_and_out_statuses[counter] == 'PM':
+                        validated_time += datetime.timedelta(hours=12)
+                    
+
+                parced_in_out_times.append(validated_time)
+                
+                counter +=1
+            else:
+                sg.popup('Enter time in proper format','HH:SS, Ex. 9:45')
+                break
+        if counter <= 2:
+            time_worked = parced_in_out_times[1]-parced_in_out_times[0]
+            data.append([in_time +' '+in_time_daytime_status,out_time+' '+out_time_daytime_status,time_worked])
+            window['-TABLE-'].update(values=data)
+
+        
+        
+        
+        print(parced_in_out_times)
 window.close()
