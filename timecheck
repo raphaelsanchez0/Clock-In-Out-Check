@@ -1,84 +1,89 @@
+from typing import Counter
 import PySimpleGUI as sg
-import csv
-import os.path
+import datetime
+
+sg.theme('Dark Red')
+time_format = '%H:%M'
+
+def validate_time_input(time):
+    try:
+        validate_time = datetime.datetime.strptime(time,time_format)
+        return validate_time
+    except:
+        return False
+
+def date_time_to_string(date_time):
+    return str(date_time.hour)+':'+str(date_time.minute)
+
+data = [
+    ['9:21 AM','3:20 PM','2.12'],
+    ['9:55 AM','3:22 PM','2.14'],
+
+]
+
+headings = ['In','Out','Hours']
 
 
 
-sg.theme('DarkAmber')   # Add a touch of color
-# All the stuff inside your window.
-#constants
+
+
+
+table_layout = [
+        [sg.Table(values=data,
+        headings = headings,
+        auto_size_columns=True,
+        justification='right',
+        num_rows=15,
+        key = '-TABLE-',
+        row_height = 35)]
+]
+
 time_field_size = (4,1)
+layout = [
+    [sg.Text('TimeCheck',font = ("Helvetica",20))],
+    [sg.Text('In:'), sg.Input(size=time_field_size,key='-INPUT_IN_TIME-'),sg.DropDown(['AM','PM'],key = '-IN_DAYTIME_STATUS-',readonly=True) ,sg.Text('Out:'),\
+        sg.Input(size=time_field_size,key='-INPUT_OUT_TIME-',),sg.DropDown(['AM','PM'],key = '-OUT_DAYTIME_STATUS-',readonly=True),sg.Button('+')],
+    [table_layout]
+]
+window = sg.Window("TimeCheck",layout)
 
-table_name = 'time_table.csv'
-
-time_file_exists = os.path.isfile(table_name)
-
-
-with open(table_name,'a') as time_file:
-    
-    with open(table_name,'r+') as time_file:
-        headers = ['In','Out','Hours']
-        csv_writer = csv.DictWriter(time_file,fieldnames=headers)
-        csv_reader = csv.reader(time_file)
-        row_counter = 0
-        #remote the plus one later
-        
-        for row in csv_reader:
-            row_counter+=1
-        rows = row_counter+1
-        
-        cols = 3
-
-        
-
-
-
-        for line in csv_reader:
-            if line:
-                csv_writer.writerow(line)
-
-        data = list(csv_reader)
-        if not time_file_exists:
-            csv_writer.writeheader()
-        
-
-
-
-menu_def = [['File', ['Open', 'Save', 'Exit']],
-            ['Help', 'About...']]
-
-
-
-table_layout = [[sg.Table(values=data, 
-                            headings=headers,
-                            num_rows=rows
-                            )]]
-
-column_layout = [[sg.Text(size=(10, 1), pad=(1,1),\
-    border_width=0, justification='right', background_color="#705e52",key=(i, j)) for j in range(cols)] for i in range(rows)]
-
-layout = [  [sg.Text('TimeCheck',font = ("Helvetica",20))],
-            [sg.Text('In:'), sg.Input(size=time_field_size,key='-INPUT_IN_TIME'),sg.Text('Out:'),sg.Input(size=time_field_size,key='-INPUT_OUT_TIME-'),sg.Button('+')],
-            #[sg.Col(column_layout, size=(400,400), scrollable=True)]]
-            [table_layout]]
-
-
-
-# Create the Window
-window = sg.Window('Window Title', layout,grab_anywhere=False)
-# Event Loop to process "events" and get the "values" of the inputs
 while True:
-    event, values = window.read()
-    if event == sg.WIN_CLOSED or event == 'Cancel': # if user closes window or clicks cancel
+    event,values = window.read()
+    if event == 'Exit' or event == sg.WIN_CLOSED:
         break
-
     if event == '+':
-        with open(table_name, 'w') as time_file:
-            writer = csv.DictWriter(time_file,fieldnames=headers)
-            in_time = values['-INPUT_IN_TIME']
-            out_time = values['-INPUT_IN_TIME']
 
-            writer.writerow({'In':values['-INPUT_IN_TIME'],'Out':values['-INPUT_OUT_TIME-'],'Hours':2})
+        in_time = values['-INPUT_IN_TIME-']
+        in_time_daytime_status = values['-IN_DAYTIME_STATUS-']
+        out_time = values['-INPUT_OUT_TIME-']
+        out_time_daytime_status = values['-OUT_DAYTIME_STATUS-']
+        in_and_out_time = [in_time,out_time]
+        in_and_out_statuses = [in_time_daytime_status,out_time_daytime_status]
+        #if len(in_time)
+        counter = 0
+        parced_in_out_times = []
+        for time in in_and_out_time:
+            if validate_time_input(time):
+                validated_time=validate_time_input(time)
+                #adding user input into the data list and updating table values accordingly
 
+                if in_and_out_statuses[counter] == 'PM':
+                        validated_time += datetime.timedelta(hours=12)
+                    
 
+                parced_in_out_times.append(validated_time)
+                
+                counter +=1
+            else:
+                sg.popup('Enter time in proper format','HH:SS, Ex. 9:45')
+                break
+        if counter <= 2:
+            time_worked = parced_in_out_times[1]-parced_in_out_times[0]
+            data.append([in_time +' '+in_time_daytime_status,out_time+' '+out_time_daytime_status,time_worked])
+            window['-TABLE-'].update(values=data)
+
+        
+        
+        
+        print(parced_in_out_times)
 window.close()
