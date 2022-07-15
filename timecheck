@@ -1,6 +1,7 @@
 from typing import Counter
 import PySimpleGUI as sg
 import datetime
+import time
 
 sg.theme('Dark Red')
 time_format = '%H:%M'
@@ -62,13 +63,13 @@ while True:
         #if len(in_time)
         counter = 0
         parced_in_out_times = []
-        for time in in_and_out_time:
-            if validate_time_input(time):
-                validated_time=validate_time_input(time)
+        for timevalue in in_and_out_time:
+            if validate_time_input(timevalue):
+                validated_time=validate_time_input(timevalue)
                 #adding user input into the data list and updating table values accordingly
 
                 if in_and_out_statuses[counter] == 'PM':
-                        validated_time += datetime.timedelta(hours=12)
+                        validated_time =validated_time+ datetime.timedelta(hours=12)
                     
 
                 parced_in_out_times.append(validated_time)
@@ -79,7 +80,8 @@ while True:
                 break
         if counter <= 2:
             time_worked = parced_in_out_times[1]-parced_in_out_times[0]
-            data.append([in_time +' '+in_time_daytime_status,out_time+' '+out_time_daytime_status,time_worked])
+            time_worked_dtf = time.gmtime(time_worked.total_seconds())
+            data.append([in_time +' '+in_time_daytime_status,out_time+' '+out_time_daytime_status,str(time_worked_dtf.tm_hour)+'.'+str(time_worked_dtf.tm_min)])
             window['-TABLE-'].update(values=data)
 
         
